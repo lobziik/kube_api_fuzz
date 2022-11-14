@@ -1,0 +1,3 @@
+[submodule "schemathesis"]
+	path = schemathesis
+	url = https://github.com/schemathesis/schemathesis.git

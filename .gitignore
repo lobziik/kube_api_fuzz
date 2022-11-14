@@ -5,3 +5,5 @@ bin
 
 results/*
 !results/.gitkeep
+
+python_venv
