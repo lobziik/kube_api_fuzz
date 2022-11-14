@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -13,11 +15,33 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
+type settings struct {
+	apiserverStdout string
+	apiserverStderr string
+
+	etcdStdout string
+	etcdStderr string
+
+	alsoLogToStdout bool
+}
+
 func main() {
+	stgs := parseSettings()
+
 	testEnv := &envtest.Environment{
 		CRDDirectoryPaths:        []string{},
 		ErrorIfCRDPathMissing:    true,
-		AttachControlPlaneOutput: true,
+		AttachControlPlaneOutput: stgs.alsoLogToStdout,
+		ControlPlane: envtest.ControlPlane{
+			APIServer: &envtest.APIServer{
+				Out: getWriter(stgs.apiserverStdout, stgs.alsoLogToStdout),
+				Err: getWriter(stgs.apiserverStderr, stgs.alsoLogToStdout),
+			},
+			Etcd: &envtest.Etcd{
+				Out: getWriter(stgs.etcdStdout, stgs.alsoLogToStdout),
+				Err: getWriter(stgs.etcdStderr, stgs.alsoLogToStdout),
+			},
+		},
 	}
 	cfg, err := testEnv.Start()
 	defer testEnv.Stop()
@@ -36,6 +60,48 @@ func main() {
 		fmt.Println(fmt.Sprintf("still running, stuff in: %s, apiserver url: %s", dumpPath, cfg.Host))
 		time.Sleep(10 * time.Second)
 	}
+}
+
+func parseSettings() *settings {
+	alsoToStdout := flag.Bool("alsoLogToStdout", false, "forward apiserver and etcd output to stdout")
+
+	apiserverStdout := flag.String("apiserverStdout", "", "forward apiserver stdout to this file")
+	apiserverStderr := flag.String("apiserverStderr", "", "forward apiserver stderr to this file")
+	etcdStdout := flag.String("etcdStdout", "", "forward etcd stdout to this file")
+	etcdStderr := flag.String("etcdStderr", "", "forward etcd stderr to this file")
+	flag.Parse()
+
+	stgs := &settings{
+		alsoLogToStdout: *alsoToStdout,
+
+		apiserverStdout: *apiserverStdout,
+		apiserverStderr: *apiserverStderr,
+
+		etcdStdout: *etcdStdout,
+		etcdStderr: *etcdStderr,
+	}
+
+	fmt.Println(fmt.Sprintf("settings: %+v", stgs))
+
+	return stgs
+}
+
+func getWriter(path string, alsoStdout bool) io.Writer {
+	if path != "" {
+		file, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0666)
+		if err != nil {
+			panic(fmt.Errorf("can not create file %s: %w", path, err))
+		}
+		if alsoStdout {
+			return io.MultiWriter(os.Stdout, file)
+		}
+		return file
+	}
+
+	if alsoStdout {
+		return os.Stdout
+	}
+	return nil
 }
 
 func dumpCertsAndConfig(cfg *rest.Config) (string, error) {
