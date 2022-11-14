@@ -15,7 +15,7 @@ Kubeconfig might be found in the tempfolder, envtest's apiserver interactable vi
 
 ##### Local
 
-This method uses local copy of the latest schemathesis version from the `main` branch of the
+This method uses local copy of the latest schemathesis version from the `main` branch of [schemathesis](https://github.com/schemathesis/schemathesis) repository
 
 Prerequisites:
 - Python 3.8+
