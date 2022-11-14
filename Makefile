@@ -26,7 +26,7 @@ check-and-reinit-submodules:
 
 
 .PHONY: python_venv
-python_venv: python_venv/touchfile ## create python virtualenv, install local copy on schemathesis into it
+python_venv: python_venv/touchfile ## create python virtualenv, install local schemathesis copy into it
 
 
 python_venv/touchfile: check-and-reinit-submodules ./schemathesis/poetry.lock
