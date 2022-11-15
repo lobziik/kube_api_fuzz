@@ -18,7 +18,11 @@ st run \
  --request-cert-key "$KUBE_CONFIGS/clientKey.pem" \
  --request-tls-verify false \
  --junit-xml "$OUTPUT_DIR/junit.xml" \
- --workers 1 \
+ --workers 4 \
+ --hypothesis-verbosity verbose \
  --checks all \
- "$APISERVER_URL/openapi/v2"
+ --data-generation-method all \
+ --debug-output-file "$OUTPUT_DIR/st_events.json" \
+ --report "$OUTPUT_DIR/schemathesis_io_report.json" \
+ "$APISERVER_URL/openapi/v2" 2>&1 | tee "$OUTPUT_DIR/st_stdout.txt"
 
