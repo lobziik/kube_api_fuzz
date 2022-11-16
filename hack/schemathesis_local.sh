@@ -23,6 +23,6 @@ st run \
  --checks all \
  --data-generation-method all \
  --debug-output-file "$OUTPUT_DIR/st_events.json" \
- --report "$OUTPUT_DIR/schemathesis_io_report.json" \
+ --report "$OUTPUT_DIR/schemathesis_io_report.tar.gz" \
  "$APISERVER_URL/openapi/v2" 2>&1 | tee "$OUTPUT_DIR/st_stdout.txt"
 
