@@ -13,12 +13,13 @@ echo "APISERVER URL IS: $APISERVER_URL"
 
 set -x
 st run \
- --show-errors-tracebacks \
+ --show-trace \
+ --validate-schema true \
  --request-cert "$KUBE_CONFIGS/clientCert.pem" \
  --request-cert-key "$KUBE_CONFIGS/clientKey.pem" \
  --request-tls-verify false \
  --junit-xml "$OUTPUT_DIR/junit.xml" \
- --workers 4 \
+ --workers 12 \
  --hypothesis-verbosity verbose \
  --checks all \
  --data-generation-method all \
